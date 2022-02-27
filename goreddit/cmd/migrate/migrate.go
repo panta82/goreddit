@@ -8,6 +8,7 @@ import (
 	_ "github.com/golang-migrate/migrate/v4/source/file"
 	"github.com/panta82/goreddit/lib"
 	settingsLib "github.com/panta82/goreddit/settings"
+	"log"
 )
 
 var CLI struct {
@@ -16,6 +17,15 @@ var CLI struct {
 
 	Down struct {
 	} `cmd:"" help:"Migrate down."`
+}
+
+type migrateLogger struct{}
+
+func (m migrateLogger) Printf(format string, v ...interface{}) {
+	log.Printf(format, v...)
+}
+func (m migrateLogger) Verbose() bool {
+	return true
 }
 
 func main() {
@@ -37,10 +47,11 @@ func main() {
 
 	m, err := migrate.New(
 		"file://"+*migrationsDir,
-		fmt.Sprintf("postgres://%s:%s@%s:%d/%s", settings.Database.User, settings.Database.Password, settings.Database.Host, settings.Database.Port, settings.Database.Name))
+		fmt.Sprintf("postgres://%s:%s@%s:%d/%s?sslmode=disable", settings.Database.User, settings.Database.Password, settings.Database.Host, settings.Database.Port, settings.Database.Name))
 	if err != nil {
 		panic(err)
 	}
+	m.Log = migrateLogger{}
 
 	switch ctx.Command() {
 	case "up":
@@ -55,12 +66,20 @@ func main() {
 func up(m *migrate.Migrate) {
 	fmt.Printf("Migrating up...\n")
 	if err := m.Up(); err != nil {
-		panic(err)
+		if err.Error() == "no change" {
+			fmt.Printf("No change.\n")
+		} else {
+			panic(err)
+		}
 	}
 }
 func down(m *migrate.Migrate) {
 	fmt.Printf("Migrating down...\n")
 	if err := m.Down(); err != nil {
-		panic(err)
+		if err.Error() == "no change" {
+			fmt.Printf("No change.\n")
+		} else {
+			panic(err)
+		}
 	}
 }
