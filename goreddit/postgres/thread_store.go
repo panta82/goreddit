@@ -11,10 +11,6 @@ type ThreadStore struct {
 	*sqlx.DB
 }
 
-func NewThreadStore(db *sqlx.DB) *ThreadStore {
-	return &ThreadStore{db}
-}
-
 func (ts *ThreadStore) Thread(id uuid.UUID) (goreddit.Thread, error) {
 	var thread goreddit.Thread
 	if err := ts.Get(&thread, "SELECT * FROM threads WHERE id = $1", id); err != nil {

@@ -4,13 +4,12 @@ import (
 	"fmt"
 	"github.com/jmoiron/sqlx"
 	_ "github.com/lib/pq"
-	"github.com/panta82/goreddit"
 )
 
 type Store struct {
-	goreddit.ThreadStore
-	goreddit.PostStore
-	goreddit.CommentStore
+	*ThreadStore
+	*PostStore
+	*CommentStore
 }
 
 func NewStore(dataSourceName string) (*Store, error) {
