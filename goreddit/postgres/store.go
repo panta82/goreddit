@@ -1,9 +1,11 @@
 package postgres
 
 import (
+	"context"
 	"fmt"
+	pgx "github.com/jackc/pgx/v4"
+	"github.com/jackc/pgx/v4/stdlib"
 	"github.com/jmoiron/sqlx"
-	_ "github.com/lib/pq"
 )
 
 type Store struct {
@@ -12,8 +14,27 @@ type Store struct {
 	*CommentStore
 }
 
+type PgLogger struct{}
+
+func (this *PgLogger) Log(ctx context.Context, level pgx.LogLevel, msg string, data map[string]interface{}) {
+	info := ""
+	if data != nil && data["sql"] != nil {
+		info = fmt.Sprintf(": %s", data["sql"])
+	}
+	fmt.Printf("%s: %s%s\n", level, msg, info)
+}
+
 func NewStore(dataSourceName string) (*Store, error) {
-	db, err := sqlx.Open("postgres", dataSourceName)
+	connConfig, err := pgx.ParseConfig(dataSourceName)
+	if err != nil {
+		return nil, fmt.Errorf("Invalid PostgreSQL connection string \"%s\": %v", dataSourceName, err)
+	}
+	connConfig.Logger = &PgLogger{}
+	connConfig.LogLevel = pgx.LogLevelTrace
+
+	pgConn := stdlib.OpenDB(*connConfig)
+
+	db := sqlx.NewDb(pgConn, "postgres")
 	if err != nil {
 		return nil, fmt.Errorf("Failed to open database: %v", err)
 	}

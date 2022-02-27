@@ -1,9 +1,12 @@
-[Database]
+[Postgres]
     Host = "localhost"
     Port = 5432
     User = "panta"
     Password = "qweasd"
     Name = "goreddit"
+
+[Web]
+    Port = 12345
 
 ## Docker
 #    Host = "localhost"

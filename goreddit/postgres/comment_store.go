@@ -31,9 +31,10 @@ func (cs *CommentStore) CommentsByPost(postID uuid.UUID) ([]goreddit.Comment, er
 }
 
 func (cs *CommentStore) CreateComment(comment *goreddit.Comment) error {
-	if err := cs.Get(&comment, `
+	if err := cs.Get(comment, `
 			INSERT INTO comments (id, post_id, content, votes)
-			VALUES ($1, $2, $3, $4)`,
+			VALUES ($1, $2, $3, $4)
+			RETURNING *`,
 		comment.ID, comment.PostID, comment.Content, comment.Votes); err != nil {
 		return fmt.Errorf("Failed to create comment %s: %w", comment.ID, err)
 	}
@@ -41,12 +42,13 @@ func (cs *CommentStore) CreateComment(comment *goreddit.Comment) error {
 }
 
 func (cs *CommentStore) UpdateComment(comment *goreddit.Comment) error {
-	if err := cs.Get(&comment, `
+	if err := cs.Get(comment, `
 			UPDATE comments
 			SET
 			    content = $2,
 			    votes = $3
-			WHERE id = $1`,
+			WHERE id = $1
+			RETURNING *`,
 		comment.ID, comment.Content, comment.Votes); err != nil {
 		return fmt.Errorf("Failed to update comment %s: %w", comment.ID, err)
 	}

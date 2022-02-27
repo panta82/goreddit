@@ -43,11 +43,9 @@ func main() {
 	}
 	fmt.Printf("Running migrations from: %s\n", *migrationsDir)
 
-	settings := settingsLib.LoadOrDie()
+	settings := settingsLib.Must(settingsLib.Load())
 
-	m, err := migrate.New(
-		"file://"+*migrationsDir,
-		fmt.Sprintf("postgres://%s:%s@%s:%d/%s?sslmode=disable", settings.Database.User, settings.Database.Password, settings.Database.Host, settings.Database.Port, settings.Database.Name))
+	m, err := migrate.New("file://"+*migrationsDir, settings.Postgres.ConnectionString())
 	if err != nil {
 		panic(err)
 	}

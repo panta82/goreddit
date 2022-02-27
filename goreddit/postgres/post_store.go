@@ -31,9 +31,10 @@ func (ps *PostStore) PostsByThread(threadID uuid.UUID) ([]goreddit.Post, error) 
 }
 
 func (ps *PostStore) CreatePost(post *goreddit.Post) error {
-	if err := ps.Get(&post, `
+	if err := ps.Get(post, `
 			INSERT INTO posts (id, title, content, thread_id, votes)
-			VALUES ($1, $2, $3, $4, $5)`,
+			VALUES ($1, $2, $3, $4, $5)
+			RETURNING *`,
 		post.ID, post.Title, post.Content, post.ThreadID, post.Votes); err != nil {
 		return fmt.Errorf("Failed to create post %s with title \"%s\": %w", post.ID, post.Title, err)
 	}
@@ -41,14 +42,15 @@ func (ps *PostStore) CreatePost(post *goreddit.Post) error {
 }
 
 func (ps *PostStore) UpdatePost(post *goreddit.Post) error {
-	if err := ps.Get(&post, `
+	if err := ps.Get(post, `
 			UPDATE posts
 			SET
 			    title = $2,
 			    content = $3,
 			    thread_id = $4,
 			    votes = $5
-			WHERE id = $1`,
+			WHERE id = $1
+			RETURNING *`,
 		post.ID, post.Title, post.Content, post.ThreadID, post.Votes); err != nil {
 		return fmt.Errorf("Failed to update post %s: %w", post.ID, err)
 	}

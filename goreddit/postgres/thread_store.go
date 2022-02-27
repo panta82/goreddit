@@ -28,9 +28,10 @@ func (ts *ThreadStore) Threads() ([]goreddit.Thread, error) {
 }
 
 func (ts *ThreadStore) CreateThread(thread *goreddit.Thread) error {
-	if err := ts.Get(&thread, `
+	if err := ts.Get(thread, `
 			INSERT INTO threads (id, title, description)
-			VALUES ($1, $2, $3)`,
+			VALUES ($1, $2, $3)
+			RETURNING *`,
 		thread.ID, thread.Title, thread.Description); err != nil {
 		return fmt.Errorf("Failed to create thread %s with title \"%s\": %w", thread.ID, thread.Title, err)
 	}
@@ -38,12 +39,13 @@ func (ts *ThreadStore) CreateThread(thread *goreddit.Thread) error {
 }
 
 func (ts *ThreadStore) UpdateThread(thread *goreddit.Thread) error {
-	if err := ts.Get(&thread, `
+	if err := ts.Get(thread, `
 			UPDATE threads
 			SET
 			    title = $2,
 			    description = $3
-			WHERE id = $1`,
+			WHERE id = $1
+			RETURNING *`,
 		thread.ID, thread.Title, thread.Description); err != nil {
 		return fmt.Errorf("Failed to update thread %s: %w", thread.ID, err)
 	}

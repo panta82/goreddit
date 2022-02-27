@@ -3,19 +3,14 @@ package settings
 import (
 	"github.com/BurntSushi/toml"
 	"github.com/panta82/goreddit/lib"
+	"github.com/panta82/goreddit/postgres"
+	"github.com/panta82/goreddit/web"
 	"os"
 )
 
-type DatabaseSettings struct {
-	Host     string
-	Port     int
-	User     string
-	Password string
-	Name     string
-}
-
 type Settings struct {
-	Database DatabaseSettings
+	Postgres postgres.Settings
+	Web      web.Settings
 }
 
 const LOCAL_SETTINGS_FILE = "settings.local.toml"
@@ -36,7 +31,10 @@ func Load() (*Settings, error) {
 		return nil, err
 	}
 
-	var settings Settings
+	var settings = Settings{
+		Postgres: *postgres.NewSettings(),
+		Web:      *web.NewSettings(),
+	}
 	_, err = toml.Decode(string(localSettingsToml), &settings)
 	if err != nil {
 		return nil, err
@@ -45,8 +43,7 @@ func Load() (*Settings, error) {
 	return &settings, nil
 }
 
-func LoadOrDie() Settings {
-	settings, err := Load()
+func Must(settings *Settings, err error) Settings {
 	if err != nil {
 		panic("Failed to load settings: " + err.Error())
 	}
