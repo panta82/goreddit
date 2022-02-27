@@ -2,7 +2,7 @@
 <project version="4">
   <component name="DBNavigator.Project.DataEditorManager">
     <record-view-column-sorting-type value="BY_INDEX" />
-    <value-preview-text-wrapping value="true" />
+    <value-preview-text-wrapping value="false" />
     <value-preview-pinned value="false" />
   </component>
   <component name="DBNavigator.Project.DataExportManager">
@@ -44,7 +44,7 @@
     <retain-sticky-names value="false" />
   </component>
   <component name="DBNavigator.Project.FileConnectionMappingManager">
-    <mapping file-url="file://$PROJECT_DIR$/goreddit/migrations/0001_initial_setup.sql" connection-id="a4b48292-898f-4055-b912-d6fd2bca22ea" session-id="MAIN" current-schema="public" />
+    <mapping file-url="file://$PROJECT_DIR$/goreddit/migrations/1_initial_setup.sql" connection-id="a4b48292-898f-4055-b912-d6fd2bca22ea" session-id="MAIN" current-schema="public" />
   </component>
   <component name="DBNavigator.Project.MethodExecutionManager">
     <method-browser />
