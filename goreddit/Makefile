@@ -11,3 +11,6 @@ migrate-up:
 
 migrate-down:
 	go run cmd/migrate/migrate.go down
+
+watch:
+	reflex -s go run cmd/goreddit/goreddit.go

@@ -27,6 +27,25 @@ func NewHandler(store goreddit.Store) *Handler {
 		router.Get("/", h.ThreadsList())
 		router.Get("/new", h.ThreadsCreate())
 		router.Post("/", h.ThreadsStore())
+		router.Post("/{id}/delete", h.ThreadsDelete())
+	})
+
+	h.Get("/html", func(writer http.ResponseWriter, request *http.Request) {
+		t := template.Must(template.ParseFiles("web/templates/layout.gohtml"))
+		type params struct {
+			Title   string
+			Text    string
+			Lines   []string
+			Number1 int
+			Number2 int
+		}
+		t.Execute(writer, params{
+			Title:   "Hello",
+			Text:    "World",
+			Lines:   []string{"a", "b", "c"},
+			Number1: 1,
+			Number2: 4,
+		})
 	})
 
 	return h
@@ -50,8 +69,10 @@ func (h *Handler) ThreadsList() http.HandlerFunc {
 		<h1>Threads</h1>
 		<dl>
 		{{range .Threads}}
-			<dt><strong>{{.Title}}</strong></dt>
-			<dd>{{.Description}}</dd>
+			<dt><strong>{{.Title}}</strong> <form method="post" action="/threads/{{.ID}}/delete"><button type="submit">Delete</button></form> </dt>
+			<dd>
+				<div>{{.Description}}</div>
+			</dd>
 		{{end}}
 		</dl>
 	`))
@@ -100,6 +121,25 @@ func (h *Handler) ThreadsStore() http.HandlerFunc {
 			Title:       title,
 			Description: description,
 		})
+		if err != nil {
+			http.Error(w, err.Error(), http.StatusInternalServerError)
+			return
+		}
+
+		http.Redirect(w, r, "/threads", http.StatusFound)
+	}
+}
+
+func (h *Handler) ThreadsDelete() http.HandlerFunc {
+	return func(w http.ResponseWriter, r *http.Request) {
+		idStr := chi.URLParam(r, "id")
+		id, err := uuid.Parse(idStr)
+		if err != nil {
+			http.Error(w, err.Error(), http.StatusBadRequest)
+			return
+		}
+
+		err = h.store.DeleteThread(id)
 		if err != nil {
 			http.Error(w, err.Error(), http.StatusInternalServerError)
 			return

@@ -1,0 +1,23 @@
+<!doctype html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport"
+          content="width=device-width, user-scalable=no, initial-scale=1.0, maximum-scale=1.0, minimum-scale=1.0">
+    <meta http-equiv="X-UA-Compatible" content="ie=edge">
+    <title>Goreddit</title>
+</head>
+<body>
+<h1>Hello world</h1>
+<p>{{.Title}}</p>
+<p>{{.Text}}</p>
+{{range .Lines}}
+    <p>{{.}}</p>
+{{end}}
+{{if ge .Number1 .Number2}}
+    <p>Number1 ({{.Number1}}) is greater than or equal to Number2 ({{.Number2}})</p>
+{{else}}
+    <p>Number1 ({{.Number1}}) is less than Number2 ({{.Number2}})</p>
+{{end}}
+</body>
+</html>
